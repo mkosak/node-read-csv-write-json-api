@@ -1,0 +1,6 @@
+{
+    "data": {
+        "CSV_FILE": "data/data.csv",
+        "JSON_FILE": "data/data.json"
+    }
+}
