@@ -5,16 +5,17 @@ const config = require('config');
 const CSV_FILE = config.get('data.CSV_FILE');
 const JSON_FILE = config.get('data.JSON_FILE');
 
-let jsonData = [];
+let jsonData = {};
 
 const parseData = (row) => {
-    let address = row.slice(2).join(' ');
-
-    jsonData.push({
-        firstName: row[0],
-        lastName: row[1],
-        address: address,
-    });
+    jsonData[row[0]] = {
+        X_Coordinate: row[1],
+        Y_Coordinate: row[2],
+        Y_Coordinate: row[3],
+        Z_Coordinate: row[4],
+        Easting_Coordinate: row[5],
+        Northing_Coordinate: row[6],
+    };
 };
 
 const read = () => {
