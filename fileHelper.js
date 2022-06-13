@@ -5,22 +5,55 @@ const config = require('config');
 const CSV_FILE = config.get('data.CSV_FILE');
 const JSON_FILE = config.get('data.JSON_FILE');
 
-let jsonData = {};
+let jsonData = {
+    features: [],
+    type: 'FeatureCollection',
+};
 
 const parseData = (row) => {
-    jsonData[row[0]] = {
-        X_Coordinate: row[1],
-        Y_Coordinate: row[2],
-        Y_Coordinate: row[3],
-        Z_Coordinate: row[4],
-        Easting_Coordinate: row[5],
-        Northing_Coordinate: row[6],
-    };
+    // remove unused header
+    if (row[0] && row[0] === 'GUID') return;
+
+    // collect stands data
+    const stands = [row[3], row[4], row[5], row[6], row[7]].filter(Boolean);
+
+    // do not store anything without stand data
+    if (!stands.length) return;
+
+    // collect data map object for each stand
+    if (stands.length > 1) {
+        stands.map((stand) => {
+            jsonData.features.push({
+                geometry: {
+                    coordinates: [row[8], row[9]],
+                    type: 'Point',
+                },
+                properties: {
+                    name: row[1],
+                    stand: stand,
+                },
+                type: 'Feature',
+            });
+        });
+    } else {
+        // collect single stand data map object
+        jsonData.features.push({
+            geometry: {
+                coordinates: [row[8], row[9]],
+                type: 'Point',
+            },
+            properties: {
+                name: row[1],
+                stand: row[3],
+            },
+            type: 'Feature',
+        });
+    }
 };
 
 const read = () => {
     fs.createReadStream(CSV_FILE)
-        .pipe(parse({ delimiter: ',', from_line: 2 }))
+        .pipe(parse({ delimiter: ',', from_line: 2, skipLines: 3 }))
         .on('data', function (csvRow) {
             parseData(csvRow);
         })
